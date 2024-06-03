@@ -32,7 +32,7 @@ class _SplashPageState extends State<SplashPage> {
         Navigator.pushNamedAndRemoveUntil(context, 'artistnavbar', (route) => false);
       } else if (role == 'admin') {
         Navigator.pushNamedAndRemoveUntil(
-            context, 'adminhome', (route) => false);
+            context, 'admindashboard', (route) => false);
       } else {
         Navigator.pushNamedAndRemoveUntil(context, 'login', (route) => false);
       }

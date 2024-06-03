@@ -31,6 +31,15 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
+  void _showSuccessMessage() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Successfully Logged in!'),
+        duration: Duration(seconds: 5),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeData = Theme.of(context);
@@ -200,10 +209,26 @@ class _LoginPageState extends State<LoginPage> {
                             }else if (userData['role'] == "admin")  {
                               Navigator.pushNamedAndRemoveUntil(
                                 context,
-                                'adminhome',
+                                'admindashboard',
                                     (route) => false,
                               );
                             }
+                          }else{
+
+
+
+
+    showDialog(context: context, builder: (context){
+    return AlertDialog(
+
+    content: Container(
+    height: 100,
+    child: Column(
+    children: [
+    Text("Error, please wait or contact admin ")
+    ],
+    ),),);});
+
                           }
                         }
                           }, child:Text("Login",style: TextStyle(color: Colors.white),) )

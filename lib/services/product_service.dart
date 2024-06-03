@@ -86,6 +86,14 @@ class ProductService {
      return null;
    }
  }
+ Future<void> deleteProduct(String productId) async {
+   try {
+     await FirebaseFirestore.instance.collection('user').doc(productId).delete();
+     await FirebaseFirestore.instance.collection('login').doc(productId).delete();
+   } catch (e) {
+     throw Exception('Failed to delete user: $e');
+   }
+ }
 
 
 }

@@ -42,7 +42,7 @@ class UserModel {
 
   // fromJson
 // Convert DocumentSnapshot to UserModel object
-  factory UserModel.fromJoson(DocumentSnapshot doc) {
+  factory UserModel.fromJson(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
     return UserModel(
       uid: data['id'],
@@ -82,4 +82,6 @@ class UserModel {
       'createdAt': createdAt ?? FieldValue.serverTimestamp(),
     };
   }
+
+
 }

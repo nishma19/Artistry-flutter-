@@ -233,7 +233,7 @@ class _AddInfoPageState extends State<AddInfoPage> {
                               padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 3.0),
                               child: CustomTextFormField(
                                 controller: _links,
-                                hintText: "Add Links",
+                                hintText: "Links",
                               ),
                             ),
                             SizedBox(height: 30),
@@ -253,7 +253,9 @@ class _AddInfoPageState extends State<AddInfoPage> {
                                   widget.uid,
                                   _firstname.text,
                                   _address.text,
-                                  _phoneno.text);
+                                  _phoneno.text,
+
+                              );
 
                             }
                             // If Artist is selected, navigate to ArtistHomePage

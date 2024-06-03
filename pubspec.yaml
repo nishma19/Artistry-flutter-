@@ -56,6 +56,14 @@ dependencies:
   razorpay_flutter:
   geocoding:
   geolocator:
+  url_launcher: ^6.0.9
+  sparkline:
+  fl_chart:
+  syncfusion_flutter_charts:
+
+
+
+
 
 
 

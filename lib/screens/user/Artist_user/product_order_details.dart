@@ -137,10 +137,10 @@ class _ProductOrdersPageState extends State<ProductOrdersPage> {
                       ),),
                       Text("Pending",style: TextStyle(fontSize: 15,fontWeight: FontWeight.w600
                       ),),
-                      Text("Past",style: TextStyle(fontSize: 15,fontWeight: FontWeight.w600
-                      ),),
-                      Text("Cancelled",style: TextStyle(fontSize: 15,fontWeight: FontWeight.w600
-                      ),),
+                      // Text("Past",style: TextStyle(fontSize: 15,fontWeight: FontWeight.w600
+                      // ),),
+                      // Text("Cancelled",style: TextStyle(fontSize: 15,fontWeight: FontWeight.w600
+                      // ),),
                     ],
                   ),
                 ),
@@ -151,8 +151,8 @@ class _ProductOrdersPageState extends State<ProductOrdersPage> {
                 children: [
                  ApprovedOrders(),
                   PendingOrders(),
-                  PastOrders(),
-                  CancelledOrders(),
+                  // PastOrders(),
+                  // CancelledOrders(),
                 ],
               ),
             ),

@@ -13,8 +13,8 @@ class Artist {
   final String role;
   final String imageUrl;
    var price;
-  // int? status;
-  // DateTime? createdAt;
+  int? status;
+  DateTime? createdAt;
 
   Artist({
     this.id,
@@ -29,8 +29,8 @@ class Artist {
     required this.address,
     required this.role,
     required this.price,
-    // this.createdAt,
-    // this.status,
+    this.createdAt,
+    this.status,
   });
 
   Map<String, dynamic> toJson() {
@@ -47,8 +47,8 @@ class Artist {
       'role':role,
       'imageUrl':imageUrl,
       'price': price,
-      // 'status': status,
-      // 'createdAt': createdAt ?? FieldValue.serverTimestamp(),
+      'status': status,
+      'createdAt': createdAt ?? FieldValue.serverTimestamp(),
 
     };
   }
@@ -68,8 +68,8 @@ class Artist {
       businessDetails: json['businessDetails'],
       links: json['links'],
       price: json['price'] ?? 0.0,
-      // status: json['status'],
-      // createdAt: (json['createdAt'] as Timestamp).toDate(),
+      status: json['status'],
+      createdAt: json['createdAt'] != null ? (json['createdAt'] as Timestamp).toDate() : null,
     );
   }
 }

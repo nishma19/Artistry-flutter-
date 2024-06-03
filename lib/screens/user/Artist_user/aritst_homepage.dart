@@ -1,3 +1,4 @@
+import 'package:artistry/screens/user/Artist_user/resheduled_booking.dart';
 import 'package:flutter/material.dart';
 import 'package:artistry/screens/user/Artist_user/cancelled_booking.dart';
 import 'package:artistry/screens/user/Artist_user/past_booking.dart';
@@ -99,7 +100,7 @@ class _ArtistHomePageState extends State<ArtistHomePage> {
         backgroundColor: Color(0xffFFF5E9),
       ),
       body: DefaultTabController(
-        length: 4,
+        length: 5,
         child: Column(
           children: [
 
@@ -133,10 +134,12 @@ class _ArtistHomePageState extends State<ArtistHomePage> {
                       ),),
                       Text("Pending",style: TextStyle(fontSize: 15,fontWeight: FontWeight.w600
                       ),),
-                      Text("Past",style: TextStyle(fontSize: 15,fontWeight: FontWeight.w600
-                      ),),
-                      Text("Cancelled",style: TextStyle(fontSize: 15,fontWeight: FontWeight.w600
-                      ),),
+                      // Text("Past",style: TextStyle(fontSize: 15,fontWeight: FontWeight.w600
+                      // ),),
+                      // Text("Resheduled",style: TextStyle(fontSize: 15,fontWeight: FontWeight.w600
+                      // ),),
+                      // Text("Cancelled",style: TextStyle(fontSize: 15,fontWeight: FontWeight.w600
+                      // ),),
                     ],
                   ),
                 ),
@@ -147,8 +150,9 @@ class _ArtistHomePageState extends State<ArtistHomePage> {
                 children: [
                   UpComingBooking(),
                   PendingBooking(),
-                  PastBooking(),
-                  CancelledBooking(),
+                  // PastBooking(),
+                  // ResheduledBooking(),
+                  // CancelledBooking(),
                 ],
               ),
             ),

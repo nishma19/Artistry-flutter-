@@ -1,14 +1,14 @@
 import 'package:artistry/firebase_options.dart';
-import 'package:artistry/screens/admin/admin_home.dart';
-import 'package:artistry/screens/admin/admin_nav_bar.dart';
-import 'package:artistry/screens/admin/admin_profilee.dart';
+
 import 'package:artistry/screens/admin/admin_usermanagement.dart';
-import 'package:artistry/screens/admin/admindashboard.dart';
+import 'package:artistry/screens/admin/admin_dashboard.dart';
+import 'package:artistry/screens/admin/notification.dart';
+import 'package:artistry/screens/admin/user_details.dart';
 import 'package:artistry/screens/common/addinfo.dart';
 import 'package:artistry/screens/user/Artist_user/Artist_nav_bar.dart';
 import 'package:artistry/screens/user/Artist_user/Artist_notification_page.dart';
 import 'package:artistry/screens/user/Artist_user/aritst_homepage.dart';
-import 'package:artistry/screens/user/end_user/Notification.dart';
+import 'package:artistry/screens/user/end_user/notification_user.dart';
 import 'package:artistry/screens/user/end_user/art_bottom_nav.dart';
 import 'package:artistry/screens/user/end_user/art_detail.dart';
 import 'package:artistry/screens/user/end_user/bottom_navigation.dart';
@@ -17,7 +17,8 @@ import 'package:artistry/screens/common/register_tab.dart';
 import 'package:artistry/screens/common/splash_page.dart';
 import 'package:artistry/screens/user/Artist_user/artist_profile.dart';
 import 'package:artistry/screens/user/end_user/cart_page.dart';
-import 'package:artistry/screens/user/end_user/order_page.dart';
+import 'package:artistry/screens/user/end_user/booking_page.dart';
+import 'package:artistry/screens/user/end_user/order_now_page.dart';
 import 'package:artistry/screens/user/end_user/review/write_review.dart';
 import 'package:artistry/screens/user/end_user/subscription_plan.dart';
 import 'package:artistry/screens/user/end_user/artist_detail.dart';
@@ -56,20 +57,23 @@ class MyApp extends StatelessWidget {
         'artistnoticn':(context)=>ArtistNotificationPage(),
         'artistnavbar':(context)=>ArtistBottomNavBarPage(),
         'artisthome':(context)=>ArtistHomePage(),
-        'adminhome':(context)=> AdminHomePage(),
+        'usermanagement': (context) => UserManagement(),
+
         'admindashboard':(context)=> AdminDashboard(),
-        // 'admindusermanagmnt':(context)=> UserManagementPage(),
-        'adminprofile':(context)=> AdminProfilePage(),
-        'adminnavbar':(context)=> AdminBottomNavBarPage(),
+        // 'userdetails':(context)=> UserDetailScreen(),
+
         'navbar':(context)=>BottomNavigationPage(),
         'artistdetail':(context)=>Artistdetails(),
         'artdetail':(context)=>ArtDetails(),
         'artbottomnav':(context)=>ArtBottomNav(),
 
         'cartpage':(context)=>CartPage(),
-        'usernotifcn':(context)=>NotificationPage(),
+        'usernotifcn':(context)=>UserNotificationsPage(),
+        'notify':(context)=>NotificationAccess(),
         'writereview':(context)=>WriteReviewPage(),
         'subscriptionplan':(context)=>SubscriptionPlanScreen(),
+        'ordernow':(context)=>OrderNowPage(),
+
 
 
 

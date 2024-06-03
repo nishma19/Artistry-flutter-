@@ -115,14 +115,14 @@ class _CartPageState extends State<CartPage> {
               children: [
                 AppText(
                   data: 'Total Amount:',
-                  size: 18,
-                  fw: FontWeight.bold,
+                  size: 15,
+                  fw: FontWeight.w500,
                   color: Color(0xFFB3261E),
                 ),
                 AppText(
                   data: '\u{20B9}${_cartService.getTotalAmount().toStringAsFixed(2)}',
-                  size: 18,
-                  fw: FontWeight.bold,
+                  size: 15,
+                  fw: FontWeight.w500,
                   color: Color(0xFFB3261E),
                 ),
               ],
@@ -132,9 +132,9 @@ class _CartPageState extends State<CartPage> {
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: ElevatedButton(
               onPressed: () {
-                // Handle checkout
+               Navigator.pushNamed(context, 'ordernow');
               },
-              child: Text('Checkout',style:  TextStyle(color:  Color(0xFFB3261E),fontWeight: FontWeight.w800),),
+              child: Text('Order Now',style:  TextStyle(color:  Color(0xFFB3261E),fontWeight: FontWeight.w400),),
               style: ElevatedButton.styleFrom(
 
                  backgroundColor: Color(0xffFFF5E9).withOpacity(0.3),

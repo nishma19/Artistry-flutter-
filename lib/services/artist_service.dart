@@ -31,12 +31,13 @@ class ArtistService {
           category: user.category,
           address: user.address,
           businessDetails: user.businessDetails,
-          links: user.links
+          links: user.links,
+          status: 0
 
 
       );
 
-
+      await
       FirebaseFirestore.instance
           .collection('login')
           .doc(userResponse.user!.uid)
@@ -44,13 +45,16 @@ class ArtistService {
 
         'uid': artist.id,
         'role': artist.role,
-        'email': artist.email
+        'email': artist.email,
+        'status':artist.status
       });
-
+      await
       FirebaseFirestore.instance
           .collection('artist')
           .doc(userResponse.user!.uid)
           .set(artist.toJson());
+
+      await _notifyAdmin(artist);
 
       return "";
     } on FirebaseAuthException catch (e) {
@@ -159,5 +163,76 @@ class ArtistService {
       return []; // Return an empty list in case of error
     }
   }
+
+
+
+
+  Future<void> deleteUser(String artistId) async {
+    try {
+      await FirebaseFirestore.instance.collection('artist').doc(artistId).delete();
+      await FirebaseFirestore.instance.collection('login').doc(artistId).delete();
+    } catch (e) {
+      throw Exception('Failed to delete user: $e');
+    }
+  }
+
+  Future<List<Artist>> getPendingRegistrations() async {
+    try {
+      QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore.instance
+          .collection('artist')
+          .where('status', isEqualTo: 0)
+          .get();
+
+      List<Artist> pendingRegistrations = snapshot.docs
+          .map((DocumentSnapshot<Map<String, dynamic>> doc) => Artist.fromJson(doc))
+          .toList();
+      return pendingRegistrations;
+    } catch (e) {
+      throw Exception('Failed to get pending registrations: $e');
+    }
+  }
+  Future<void> approveRegistration(String registrationId) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('artist')
+          .doc(registrationId)
+          .update({'status': 1}).then((value) {
+
+
+        FirebaseFirestore.instance
+            .collection('login')
+            .doc(registrationId)
+            .update({'status': 1});
+
+      });
+    } catch (e) {
+      throw Exception('Failed to approve registration: $e');
+    }
+  }
+
+  // Method to reject a registration
+
+  Future<void> rejectRegistration(String registrationId) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('artist')
+          .doc(registrationId)
+          .update({'status': 'rejected'});
+    } catch (e) {
+      throw Exception('Failed to reject registration: $e');
+    }
+  }
+
+
+
+  Future<void> _notifyAdmin(Artist artist) async {
+    // Create a notification for the admin
+    await FirebaseFirestore.instance.collection('admin_notifications').add({
+      'message': 'New artist registration: ${artist.name}',
+      'artist_id': artist.id,
+      'timestamp': DateTime.now(),
+    });
+  }
+
 
 }

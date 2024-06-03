@@ -36,6 +36,11 @@ class _UserHomePageState extends State<UserHomePage>
 
   Map<String, bool> wishlistStatus = {};
 
+  List<String> filteredCategories = [];
+  List<Artist> filteredArtists = [];
+  List<String> filteredProductNames = [];
+
+
   @override
   void initState() {
     super.initState();
@@ -47,6 +52,20 @@ class _UserHomePageState extends State<UserHomePage>
     _fetchData();
 
     _fetchWishlistStatus();
+    _checkUnreadNotifications();
+  }
+
+
+  Future<void> _checkUnreadNotifications() async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('user_notifications')
+        .where('userId', isEqualTo: 'yourUserId') // Replace with actual user ID
+        .where('read', isEqualTo: false)
+        .get();
+
+    setState(() {
+      hasUnreadNotifications = snapshot.docs.isNotEmpty;
+    });
   }
 
 
@@ -82,6 +101,19 @@ class _UserHomePageState extends State<UserHomePage>
     _tabController!.dispose();
   }
 
+  void _filterSearchResults(String query) {
+    // Filter categories
+    filteredCategories = categories.where((category) => category.toLowerCase().contains(query.toLowerCase())).toList();
+
+    // Filter artists
+    filteredArtists = artists.where((artist) => artist.name.toLowerCase().contains(query.toLowerCase())).toList();
+
+    // Filter product names
+    // filteredProductNames = productNames.where((productName) => productName.toLowerCase().contains(query.toLowerCase())).toList();
+
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -90,6 +122,7 @@ class _UserHomePageState extends State<UserHomePage>
           width: 350,
           child: TextField(
             controller: _search,
+            onChanged: _filterSearchResults,
             cursorColor: Color(0xffD77272),
             decoration: InputDecoration(
               contentPadding: EdgeInsets.all(13),
@@ -126,21 +159,20 @@ class _UserHomePageState extends State<UserHomePage>
             child: Padding(
               padding: const EdgeInsets.all(20.0),
               child: InkWell(
-                onTap: () {
-                  Navigator.pushNamed(context, 'usernotifcn');
+                onTap: () async {
+                  await Navigator.pushNamed(context, 'usernotifcn');
+                  _checkUnreadNotifications(); // Re-check notifications after returning
                 },
                 child: Stack(
                   children: [
                     Icon(
                       hasUnreadNotifications
-                          ? Icons.notifications_none
+                          ? Icons.notifications
                           : Icons.notifications_none,
-                      color: hasUnreadNotifications
-                          ? Color(0xFFB3261E)
-                          : Color(0xFFB3261E),
+                      color: Color(0xFFB3261E),
                       size: 25,
                     ),
-                    if (hasUnreadNotifications) // Display notification indicator if there are unread notifications
+                    if (hasUnreadNotifications)
                       Positioned(
                         right: 0,
                         child: Container(
@@ -185,13 +217,16 @@ class _UserHomePageState extends State<UserHomePage>
             ),
 
             categories.isEmpty
-                ? CircularProgressIndicator() // Show loading indicator while fetching data
+                ? CircularProgressIndicator(color: Color(0xFFB3261E),) // Show loading indicator while fetching data
                 : TabBar(
                     controller: _tabController,
                     tabs: categories
                         .map((category) => Tab(text: category))
                         .toList(),
-                  ),
+              indicatorColor: Color(0xFFB3261E),
+              labelColor: Color(0xFFB3261E),
+              unselectedLabelColor: Colors.grey,
+            ),
 
             // Tab Bar View with Dynamic Content
             Container(
@@ -206,6 +241,7 @@ class _UserHomePageState extends State<UserHomePage>
 
                   // Return widget for each category
                   return ListView.builder(
+                    scrollDirection: Axis.horizontal,
                     itemCount: categoryArtists.length,
                     itemBuilder: (context, index) {
                       final artist = categoryArtists[index];
@@ -331,7 +367,7 @@ class _UserHomePageState extends State<UserHomePage>
                   }
 
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return CircularProgressIndicator();
+                    return CircularProgressIndicator(color: Color(0xFFB3261E),);
                   }
 
                   List<QueryDocumentSnapshot> documents = snapshot.data!.docs;
@@ -394,7 +430,8 @@ class _UserHomePageState extends State<UserHomePage>
                   }
 
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return CircularProgressIndicator();
+                    return CircularProgressIndicator(color:Color(0xFFB3261E) ,);
+
                   }
 
                   List<QueryDocumentSnapshot> documents = snapshot.data!.docs;
@@ -424,10 +461,12 @@ class _UserHomePageState extends State<UserHomePage>
 
                       return GestureDetector(
                         onTap: () {
+                          print(product['name']);
                           Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) => ArtDetails(
+
                                 productData: product,
                                 docId: docId,
                                 wishlistStatus: wishlistStatus,
@@ -516,87 +555,3 @@ class _UserHomePageState extends State<UserHomePage>
     );
   }
 }
-
-//
-// SingleChildScrollView(
-// scrollDirection: Axis.horizontal,
-// child: Padding(
-// padding: const EdgeInsets.only(left: 10.0,right: 20,),
-// child: Row(
-// children: List.generate(cardNames1.length, (index) {
-// return GestureDetector(
-// onTap: () {
-// selectCard1(index);
-// },
-// child: Card(
-// elevation: 7,
-// color: selectedCardIndex1 == index ? Color(0xffD77272) : Color(0xffF6E4CF),
-// shadowColor: Colors.orange[300],
-// child: Padding(
-// padding: const EdgeInsets.symmetric(vertical: 8.0,horizontal: 10),
-// child:selectedCardIndex1 == index ?  Text(cardNames1[index], style: TextStyle(color: Colors.white,fontSize: 15))
-//     : Text(cardNames1[index], style: TextStyle(color: Color(0xffD77272),fontSize: 15))
-// ),
-// ),
-// );
-// }),
-// ),
-// ),
-//
-//
-// ),
-//
-
-// Expanded(
-// child: Padding(
-// padding: const EdgeInsets.all(20.0),
-// child: GridView.count(
-// crossAxisCount: 2,
-// mainAxisSpacing: 4,
-// crossAxisSpacing: 4,
-// shrinkWrap: true,
-// children: List.generate(
-// 12, // Adjust the number of children as needed
-// (index) {
-// return Stack(
-// children: [ ClipRRect(
-// borderRadius: BorderRadius.circular(20),
-// child: Image.asset(
-// 'assets/img/artrim3.jpg',
-// height: 200,
-// width: 200,
-// fit: BoxFit.cover,
-// )),
-//
-// Positioned(
-// bottom:0,
-// right:0,left:0,
-//
-//
-// child: Container(
-// height:40,
-// width:100,
-//
-//
-// decoration:BoxDecoration(
-//
-// color:Color(0xffF6E4CF).withOpacity(0.8),
-// borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)
-// , )
-// ),
-// child: Column(
-// children: [
-// Text("The Pic",style: TextStyle(fontSize: 15,fontWeight: FontWeight.w600,color: Color(0xffD77272)),),
-// Text("JohnDoe",style: TextStyle(fontSize: 10,fontWeight: FontWeight.w500,color: Colors.black54),)
-// ],
-// ),
-// ),
-// ),
-//
-// ]
-// );
-// },
-// ),
-// ),
-// ),
-// ),

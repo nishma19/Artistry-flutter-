@@ -60,6 +60,8 @@ class _ArtDetailsState extends State<ArtDetails> {
 
   @override
   Widget build(BuildContext context) {
+
+    print(widget.productData!['serviceId']);
     String description =
         "Crafted with passion and precision,\neach piece reflects the artisan's mastery,\nweaving together tradition and innovation into\ntangible beauty.";
 
@@ -77,6 +79,8 @@ class _ArtDetailsState extends State<ArtDetails> {
                 'name': widget.productData!['name'],
                 'price': widget.productData!['price'],
                 'imageUrl': widget.productData!['imageUrl'],
+                'serviceId':widget.productData!['artistId'],
+                'serviceName':widget.productData!['artistName']
               };
               setState(() {
                 wishlistStatus[docId] = wishlistStatus[docId] != true;
@@ -118,19 +122,10 @@ class _ArtDetailsState extends State<ArtDetails> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(
-                            Icons.currency_rupee,
-                            size: 30,
-                          ),
-                          AppText(
-                              data: widget.productData!['price'].toString(),
-                              size: 25,
-                              fw: FontWeight.w800),
-                        ],
-                      ),
+                      AppText(
+                          data: '\u{20B9}${widget.productData!['price']}'.toString(),
+                          size: 25,
+                          fw: FontWeight.w800),
                       SizedBox(
                         height: 10,
                       ),
@@ -249,7 +244,7 @@ class _ArtDetailsState extends State<ArtDetails> {
                           ),
                 ElevatedButton(
                   onPressed: () {
-                    // Add your onPressed callback logic here
+                    Navigator.pushNamed(context, 'ordernow',arguments:widget.productData);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xffFFF5E9),

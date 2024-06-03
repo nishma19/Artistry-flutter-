@@ -1,5 +1,7 @@
 import 'package:artistry/widgets/apptext.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class ApprovedOrders extends StatefulWidget {
   const ApprovedOrders({super.key});
@@ -9,195 +11,171 @@ class ApprovedOrders extends StatefulWidget {
 }
 
 class _ApprovedOrdersState extends State<ApprovedOrders> {
+  Future<List<Map<String, dynamic>>> fetchApprovedOrders() async {
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('orders')
+        .where('status', isEqualTo: 'approved')
+        .get();
+
+    return snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+  }
+
+  Future<String?> getUserProfileImageUrl(String userId) async {
+    var userData = await FirebaseFirestore.instance.collection('user').doc(userId).get();
+    return userData.data()?['imageUrl'];
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
       height: double.infinity,
-      child: Column(
-        children: [
-          ListView.builder(
-            itemCount: 2,
-            shrinkWrap: true,
-            itemBuilder: (context, index) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Card(
-                  elevation: 3,
-                  shadowColor: Colors.orange[300],
-                  child: ListTile(
+      child: FutureBuilder<List<Map<String, dynamic>>>(
+        future: fetchApprovedOrders(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(child: Text('No approved orders found'));
+          } else {
+            final approvedOrders = snapshot.data!;
+            return ListView.builder(
+              itemCount: approvedOrders.length,
+              itemBuilder: (context, index) {
+                final order = approvedOrders[index];
+                final date = DateTime.parse(order['createdAt']);
+                final formattedDate = DateFormat.yMMMd().format(date);
+                final time = DateFormat.Hm().format(date);
 
-                    leading: CircleAvatar(
-                      radius: 30,
-                      backgroundImage: AssetImage("assets/img/billie.jpg"),
-                    ),
-                    title:
-                    Column(
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.access_time),
-                            SizedBox(width: 5),
-                            Column(
-                              children: [
+                return FutureBuilder<String?>(
+                  future: getUserProfileImageUrl(order['userId']),
+                  builder: (context, userImageSnapshot) {
+                    if (userImageSnapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    }
 
-                                AppText(data: "Date&Time", color: Colors.grey),
-                              ],
-                            ),
-                          ],
-                        ),
+                    final userImageUrl = userImageSnapshot.data;
 
-                        Row(
-                          children: [
-                            Icon(Icons.location_on),
-                            SizedBox(width: 5),
-                            Column(
-                              children: [
-
-                                AppText(data: "Location", color: Colors.grey),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-
-
-
-                    subtitle: 
-
-
-
-                    GestureDetector(onTap: (){
-
-                      _showProductDetailsDialog(context);
-                    },
-                      child: Container(height: 30,
-                        width: 50,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadiusDirectional.circular(10),
-                          color: Colors.white70,
-                        ),
-                        child: Center(
-                          child: AppText(
-                            data: "Product Details",
-                            color: Color(0xFFB3261E),
-                            fw: FontWeight.w600,
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: Card(
+                        elevation: 3,
+                        shadowColor: Colors.orange[300],
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            radius: 30,
+                            backgroundImage: userImageUrl != null
+                                ? NetworkImage(userImageUrl)
+                                : AssetImage("assets/img/default_avatar.jpg") as ImageProvider,
                           ),
-                        ),
-                      ),
-                    ),
-
-                    trailing: GestureDetector(
-                      onTap: () {
-                        // Show the pop-up dialog when the "Edit" text is tapped
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              backgroundColor: Colors.white,
-                              shadowColor: Colors.grey,elevation: 10,
-                              title: Text('Edit Booking',style: TextStyle(color: Color(0xFFB3261E)),),
-                              content: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                          title: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
                                 children: [
-                                  Text('You tapped the Edit button!'),
-                                  SizedBox(height: 20),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  Icon(Icons.access_time),
+                                  SizedBox(width: 5),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.white,
-                                        ),
-                                        onPressed: () {
-                                          // Handle rescheduling event
-                                          Navigator.of(context).pop();
-                                          // Implement rescheduling logic here
-                                        },
-                                        child: Text('Reschedule',style: TextStyle(color: Color(0xffD77272)),),
-                                      ),
-                                      SizedBox(width: 5,),
-                                      ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.white,
-                                        ),
-                                        onPressed: () {
-                                          // Handle canceling event
-                                          Navigator.of(context).pop();
-                                          // Implement canceling logic here
-                                        },
-                                        child: Text('Cancel',style: TextStyle(color: Color(0xffD77272)),),
-                                      ),
+                                      AppText(data: formattedDate, color: Colors.grey),
+                                      AppText(data: time, color: Colors.grey),
                                     ],
                                   ),
                                 ],
                               ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                  child: Text('Close',style: TextStyle(color: Color(0xffD77272)),),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      },
-                      // child: Container(height: 40,
-                      //   width: 50,
-                      //   decoration: BoxDecoration(
-                      //     borderRadius: BorderRadiusDirectional.circular(10),
-                      //     color: Colors.white70,
-                      //   ),
-                      //   child: Center(
-                          child: AppText(
-                            data: "Edit",
-                            color: Color(0xFFB3261E),
-                            fw: FontWeight.w600,
+                              SizedBox(height: 5),
+                              Row(
+                                children: [
+                                  Icon(Icons.location_on),
+                                  SizedBox(width: 5),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      AppText(data: order['userAddress'], color: Colors.grey),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
-                        // ),
-                      // ),
-                    ),
-                  ),
-                  color: Color(0xffF6E4CF),
-                ),
-              );
-            },
-          ),
-        ],
+                          subtitle: GestureDetector(
+                            onTap: () {
+                              _showProductDetailsDialog(context, order);
+                            },
+                            child: Container(
+                              height: 30,
+                              width: 100,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadiusDirectional.circular(10),
+                                color: Colors.white70,
+                              ),
+                              child: Center(
+                                child: AppText(
+                                  data: "Product Details",
+                                  color: Color(0xFFB3261E),
+                                  fw: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+                          trailing: GestureDetector(
+                            onTap: () {
+                              _showEditDialog(context);
+                            },
+                            child: Container(
+                              height: 40,
+                              width: 50,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadiusDirectional.circular(10),
+                                color: Colors.white70,
+                              ),
+                              child: Center(
+                                child: AppText(
+                                  data: "Edit",
+                                  color: Color(0xFFB3261E),
+                                  fw: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        color: Color(0xffF6E4CF),
+                      ),
+                    );
+                  },
+                );
+              },
+            );
+          }
+        },
       ),
     );
   }
 
-
-
-
-  void _showProductDetailsDialog(BuildContext context) {
+  void _showProductDetailsDialog(BuildContext context, Map<String, dynamic> order) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Product Details",style: TextStyle(color: Color(0xFFB3261E)),),
+          title: Text("Product Details", style: TextStyle(color: Color(0xFFB3261E))),
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
               Center(
-                child: Image.asset(
-                  "assets/img/artrim3.jpg", // Provide your image path here
+                child: Image.network(
+                  order['productImageUrl'],
                   width: 200,
                   height: 200,
                   fit: BoxFit.cover,
                 ),
               ),
-
               SizedBox(height: 10),
-              Text("Product Name: Your Product Name"),
-              Text("Price: \$X.XX"),
-              // Add more details here as needed
+              Text("Product Name: ${order['productName']}"),
+              Text("Price: \$${order['servicePrice']}"),
             ],
           ),
           actions: [
@@ -205,7 +183,7 @@ class _ApprovedOrdersState extends State<ApprovedOrders> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text("Close",style: TextStyle(color: Color(0xFFB3261E)),),
+              child: Text("Close", style: TextStyle(color: Color(0xFFB3261E))),
             ),
           ],
         );
@@ -213,8 +191,59 @@ class _ApprovedOrdersState extends State<ApprovedOrders> {
     );
   }
 
-
-
-
-
+  void _showEditDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          shadowColor: Colors.grey,
+          elevation: 10,
+          title: Text('Edit Booking', style: TextStyle(color: Color(0xFFB3261E))),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('You tapped the Edit button!'),
+              SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      // Implement rescheduling logic here
+                    },
+                    child: Text('Reschedule', style: TextStyle(color: Color(0xffD77272))),
+                  ),
+                  SizedBox(width: 5),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      // Implement canceling logic here
+                    },
+                    child: Text('Cancel', style: TextStyle(color: Color(0xffD77272))),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Close', style: TextStyle(color: Color(0xffD77272))),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }

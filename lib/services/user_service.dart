@@ -9,7 +9,7 @@ class UserService {
   // logout
   //alrady logined
   final CollectionReference usersCollection =
-  FirebaseFirestore.instance.collection('users');
+  FirebaseFirestore.instance.collection('user');
 
   Future<String?> registerUser(UserModel user) async {
     try {
@@ -17,14 +17,15 @@ class UserService {
           .createUserWithEmailAndPassword(
           email: user.email.toString(), password: user.password.toString());
 
-      final usermodel=UserModel(
+      final usermodel = UserModel(
         imageUrl: "",
         role: user.role,
 
-        email:user.email,
+        email: user.email,
         uid: userResponse.user!.uid,
-        password:user.password,
-        name: user.name, phone: user.phone,
+        password: user.password,
+        name: user.name,
+        phone: user.phone,
 
       );
 
@@ -34,9 +35,9 @@ class UserService {
           .doc(userResponse.user!.uid)
           .set({
 
-        'uid':usermodel.uid,
-        'role':usermodel.role,
-        'email':usermodel.email
+        'uid': usermodel.uid,
+        'role': usermodel.role,
+        'email': usermodel.email
       });
 
       FirebaseFirestore.instance
@@ -55,37 +56,23 @@ class UserService {
   }
 
 
-  Future<void>updateUser(String? uid,String name,  String address, String phone )async{
-
-
+  Future<void> updateUser(String? uid, String name, String address,
+      String phone) async {
     FirebaseFirestore.instance.collection('user').doc(uid!).update({
 
-      'phone':phone,
-      'address':address,
-      'name':name
-
-
-
-
-
-
+      'phone': phone,
+      'address': address,
+      'name': name
     });
 
 
-    SharedPreferences _pref=await SharedPreferences.getInstance();
-    _pref.setString('name',name);
+    SharedPreferences _pref = await SharedPreferences.getInstance();
+    _pref.setString('name', name);
 
 
     _pref.setString('phone', phone);
-    _pref.setString('address',address);
-
-
-
+    _pref.setString('address', address);
   }
-
-
-
-
 
 
   // Future<void> updateUserImage(String? uid, String? imageUrl) async {
@@ -96,9 +83,6 @@ class UserService {
   //     // Handle error appropriately
   //   }
   // }
-
-
-
 
 
   Future<String?> getUserProfilePicURL(String serviceId) async {
@@ -137,7 +121,6 @@ class UserService {
   }
 
 
-
   Future<String> getUserProfileImageUrl(String userId) async {
     var userData = await FirebaseFirestore.instance
         .collection('user')
@@ -147,30 +130,42 @@ class UserService {
   }
 
 
-
   Future<List<UserModel>> getAllUsers() async {
     try {
-      QuerySnapshot querySnapshot = await usersCollection.get();
+      QuerySnapshot querySnapshot =
+      await FirebaseFirestore.instance.collection('user').get();
+
       List<UserModel> users = querySnapshot.docs
-          .map((doc) => UserModel.fromJoson(doc))
+          .map((doc) => UserModel.fromJson(doc))
           .toList();
       return users;
-    } catch (error) {
-      print('Error fetching users: $error');
-      return []; // Return an empty list in case of an error
+    } catch (e) {
+      throw Exception('Failed to fetch users: $e');
     }
   }
 
   Future<void> deleteUser(String userId) async {
     try {
-      await usersCollection.doc(userId).delete();
-    } catch (error) {
-      print('Error deleting user: $error');
-      // Handle error appropriately (e.g., show error message)
+      await FirebaseFirestore.instance.collection('user').doc(userId).delete();
+      await FirebaseFirestore.instance.collection('login').doc(userId).delete();
+    } catch (e) {
+      throw Exception('Failed to delete user: $e');
     }
   }
 
 
+  Future<UserModel> getUserById(String userId) async {
+    try {
+      DocumentSnapshot doc = await usersCollection.doc(userId).get();
+      if (doc.exists) {
+        return UserModel.fromJson(doc);
+      } else {
+        throw Exception("User not found");
+      }
+    } catch (e) {
+      throw Exception("Error fetching user: $e");
+    }
+  }
 
 }
 
